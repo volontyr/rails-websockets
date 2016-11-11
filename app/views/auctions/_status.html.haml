@@ -1,0 +1,6 @@
+-if @product.auction.top_bid.user_id == current_user.id
+  %p You won the auction
+  %p
+    =link_to 'Claim the product', transfer_product_path, class: 'btn btn-primary', method: :put
+-else
+  You lost the auction
