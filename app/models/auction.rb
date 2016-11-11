@@ -7,6 +7,6 @@ class Auction < ActiveRecord::Base
   end
 
   def current_bid
-    top_bid.value.nil? ? value : top_bid.value
+    top_bid.nil? ? value : top_bid.value
   end
 end
