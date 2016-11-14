@@ -1,4 +1,5 @@
 require File.expand_path('../boot', __FILE__)
+require File.expand_path('../../lib/auction_socket', __FILE__)
 
 require 'rails/all'
 
@@ -22,6 +23,6 @@ module Websockets
 
     # Do not swallow errors in after_commit/after_rollback callbacks.
     config.active_record.raise_in_transactional_callbacks = true
-
+    config.middleware.use AuctionSocket
   end
 end
