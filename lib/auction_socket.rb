@@ -1,3 +1,5 @@
+require_relative 'place_bid'
+
 class AuctionSocket
 
   def initialize(app)
@@ -8,11 +10,7 @@ class AuctionSocket
     @env = env
 
     if socket_request?
-      socket = Faye::WebSocket.new(env)
-      socket.on :open do
-        socket.send 'Hello!'
-      end
-
+      socket = spawn_socket
       socket.rack_response
     else
       @app.call(env)
@@ -24,5 +22,44 @@ class AuctionSocket
   private
     def socket_request?
       Faye::WebSocket.websocket? env
+    end
+
+    def spawn_socket
+      socket = Faye::WebSocket.new(env)
+      socket.on :open do
+        socket.send 'Hello!'
+      end
+
+      socket.on :message do |event|
+        socket.send(event.data)
+        begin
+          tokens = event.data.split(' ')
+          operation = tokens.delete_at(0)
+
+          case operation
+            when 'bid'
+              bid(socket, tokens)
+          end
+        rescue Exception => e
+          p e
+          p e.backtrace
+        end
+      end
+
+      socket
+    end
+
+    def bid(socket, tokens)
+      service = PlaceBid.new(
+        user_id: tokens[0],
+        auction_id: tokens[1],
+        value: tokens[2]
+      )
+
+      if service.execute
+        socket.send('bidok')
+      else
+        socket.send("underbid #{service.auction.current_bid}")
+      end
     end
 end

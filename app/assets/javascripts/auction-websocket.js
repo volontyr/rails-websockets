@@ -24,7 +24,7 @@ AuctionSocket.prototype.initBinds = function() {
 
         switch(tokens[0]) {
             case "bidok":
-                _this.bidOk(tokens[1]);
+                _this.bidOk();
                 break;
             case "underbid":
                 _this.underBid(tokens[1]);
@@ -54,9 +54,9 @@ AuctionSocket.prototype.sendBid = function(value) {
     }));
 };
 
-AuctionSocket.prototype.bidOk = function(value) {
+AuctionSocket.prototype.bidOk = function() {
     this.form.find(".message strong").html(
-        "Your bid is " + value + "."
+        "Your bid is " + this.value + "."
     );
 };
 
