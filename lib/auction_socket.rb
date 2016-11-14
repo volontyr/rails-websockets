@@ -4,6 +4,7 @@ class AuctionSocket
 
   def initialize(app)
     @app = app
+    @clients = []
   end
 
   def call(env)
@@ -11,6 +12,7 @@ class AuctionSocket
 
     if socket_request?
       socket = spawn_socket
+      @clients << socket
       socket.rack_response
     else
       @app.call(env)
@@ -58,8 +60,30 @@ class AuctionSocket
 
       if service.execute
         socket.send('bidok')
+        notify_outbids(socket, tokens[2])
       else
-        socket.send("underbid #{service.auction.current_bid}")
+        if service.status == :won
+          notify_auction_ended(socket)
+        else
+          socket.send("underbid #{service.auction.current_bid}")
+        end
       end
+    end
+
+    def notify_outbids(socket, value)
+      @clients.reject { |client| client == socket or !same_auction?(client, socket) }.each do |client|
+        client.send("outbid #{value}")
+      end
+    end
+
+    def notify_auction_ended(socket)
+      socket.send('won')
+      @clients.reject { |client| client == socket or !same_auction?(client, socket) }.each do |client|
+        client.send('lost')
+      end
+    end
+
+    def same_auction?(other_socket, socket)
+      other_socket.env['REQUEST_PATH'] == socket.env['REQUEST_PATH']
     end
 end

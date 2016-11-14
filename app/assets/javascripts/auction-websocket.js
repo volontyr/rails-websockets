@@ -68,13 +68,13 @@ AuctionSocket.prototype.underBid = function(value) {
 
 AuctionSocket.prototype.outBid = function(value) {
     this.form.find(".message strong").html(
-        "Your bid is outbid with " + value + "."
+        "You were outbid. Now bid is " + value + "."
     );
 };
 
 AuctionSocket.prototype.won = function() {
     this.form.find(".message strong").html(
-        "You won the auction with " + this.value + "."
+        "You won the auction with bid: " + this.value + "."
     );
 };
 
